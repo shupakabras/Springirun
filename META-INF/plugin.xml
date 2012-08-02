@@ -39,6 +39,9 @@
                               implementation="org.springirun.reference.SpringirunReferenceContributor"/>
     <dom.fileDescription implementation="org.springirun.model.BeansFileDescriptor" />
 
+    <toolWindow id="Springirun" anchor="right" icon="/images/bean.png"
+                factoryClass="org.springirun.tool.ContextManagerToolWindowFactory" />
+
   </extensions>
 
   <actions>
