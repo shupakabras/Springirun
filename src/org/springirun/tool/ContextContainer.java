@@ -15,16 +15,24 @@
  */
 package org.springirun.tool;
 
+import com.intellij.util.xmlb.annotations.AbstractCollection;
+import com.intellij.util.xmlb.annotations.Property;
+import com.intellij.util.xmlb.annotations.Tag;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Information about class functionality.
  *
- * @author Andrey Borovik
+ * @author Andrii Borovyk
  */
+@Tag("ContextContainer")
 public class ContextContainer {
 
-    private List<ContextContainerEntity> contextContainerRootEntities;
+    @Property(surroundWithTag = false)
+    @AbstractCollection(surroundWithTag = false)
+    private List<ContextContainerEntity> contextContainerRootEntities = new ArrayList<ContextContainerEntity>();
 
     public List<ContextContainerEntity> getContextContainerRootEntities() {
         return contextContainerRootEntities;

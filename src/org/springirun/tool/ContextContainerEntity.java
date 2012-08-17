@@ -15,22 +15,35 @@
  */
 package org.springirun.tool;
 
+import com.intellij.util.xmlb.annotations.AbstractCollection;
+import com.intellij.util.xmlb.annotations.Attribute;
+import com.intellij.util.xmlb.annotations.Tag;
+import com.intellij.util.xmlb.annotations.Transient;
+
 import java.util.List;
 
 /**
  * Information about class functionality.
  *
- * @author Andrey Borovik
+ * @author Andrii Borovyk
  */
+@Tag("ContextContainerEntity")
 public class ContextContainerEntity {
 
+    @Attribute("name")
     private String name;
 
+    @Attribute("root")
     private boolean isRoot;
 
+    @Transient
     private ContextContainerEntity parentContextContainerEntity;
 
+    @AbstractCollection(elementTag = "ChildContextContainers")
     private List<ContextContainerEntity> childContextContainers;
+
+    public ContextContainerEntity() {
+    }
 
     public ContextContainerEntity(final String name, final boolean root,
         final ContextContainerEntity parentContextContainerEntity,
@@ -55,6 +68,22 @@ public class ContextContainerEntity {
 
     public List<ContextContainerEntity> getChildContextContainers() {
         return childContextContainers;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setRoot(final boolean root) {
+        isRoot = root;
+    }
+
+    public void setParentContextContainerEntity(final ContextContainerEntity parentContextContainerEntity) {
+        this.parentContextContainerEntity = parentContextContainerEntity;
+    }
+
+    public void setChildContextContainers(final List<ContextContainerEntity> childContextContainers) {
+        this.childContextContainers = childContextContainers;
     }
 
     @Override

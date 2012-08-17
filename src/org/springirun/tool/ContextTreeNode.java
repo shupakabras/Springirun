@@ -15,21 +15,27 @@
  */
 package org.springirun.tool;
 
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * Information about class functionality.
  *
- * @author Andrey Borovik
+ * @author Andrii Borovyk
  */
-public class ContextTreeNode implements TreeNode {
+public class ContextTreeNode implements MutableTreeNode {
 
     private ContextContainerEntity contextContainerEntity;
 
     public ContextTreeNode(final ContextContainerEntity contextContainerEntity) {
         this.contextContainerEntity = contextContainerEntity;
+    }
+
+    public ContextContainerEntity getContextContainerEntity() {
+        return contextContainerEntity;
     }
 
     @Override
@@ -71,6 +77,48 @@ public class ContextTreeNode implements TreeNode {
 
     @Override
     public String toString() {
-        return contextContainerEntity.toString();
+        return contextContainerEntity != null ? contextContainerEntity.toString() : null;
+    }
+
+    @Override
+    public void insert(final MutableTreeNode mutableTreeNode, final int i) {
+        ContextContainerEntity entity = ((ContextTreeNode) mutableTreeNode).getContextContainerEntity();
+        contextContainerEntity.getChildContextContainers().add(entity);
+        entity.setParentContextContainerEntity(contextContainerEntity);
+    }
+
+    @Override
+    public void remove(final int i) {
+        contextContainerEntity.getChildContextContainers().remove(i);
+    }
+
+    @Override
+    public void remove(final MutableTreeNode mutableTreeNode) {
+        ContextContainerEntity entity = ((ContextTreeNode) mutableTreeNode).getContextContainerEntity();
+        for (Iterator<ContextContainerEntity> iterator = contextContainerEntity.getChildContextContainers().iterator();
+             iterator.hasNext(); ) {
+            if (iterator.next().equals(entity)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    @Override
+    public void setUserObject(final Object o) {
+        this.contextContainerEntity = (ContextContainerEntity) o;
+    }
+
+    @Override
+    public void removeFromParent() {
+        ContextContainerEntity parent = this.contextContainerEntity.getParentContextContainerEntity();
+        if (parent != null) {
+            parent.getChildContextContainers().remove(contextContainerEntity);
+            contextContainerEntity.setParentContextContainerEntity(null);
+        }
+    }
+
+    @Override
+    public void setParent(final MutableTreeNode mutableTreeNode) {
+
     }
 }

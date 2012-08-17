@@ -39,17 +39,21 @@
                               implementation="org.springirun.reference.SpringirunReferenceContributor"/>
     <dom.fileDescription implementation="org.springirun.model.BeansFileDescriptor" />
 
-    <toolWindow id="Springirun" anchor="right" icon="/images/bean.png"
-                factoryClass="org.springirun.tool.ContextManagerToolWindowFactory" />
+    <projectService serviceImplementation="org.springirun.tool.ContextPersistentStateComponent" />
 
   </extensions>
 
   <actions>
     <!-- Add your actions here -->
     <group id="Springirun.ActionGroup" text="Springirun" description="Springirun plugin">
-      <action id="Go.NewApplication" text="Re-import schemas"
+      <action id="Springirun.Reimport" text="Re-import schemas"
             description="Re-import Spring XSD files"
             class="org.springirun.SpringXSDAction">
+      </action>
+      <action id="Springirun.ContextManager" text="Context Manager"
+              description="Show context manager"
+              class="org.springirun.tool.ContextManagerEditorAction" icon="/images/bean.png" >
+
       </action>
       <add-to-group group-id="MainMenu" anchor="last" />
     </group>
