@@ -20,9 +20,15 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.patterns.XmlPatterns;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.xml.XmlAttribute;
+import com.intellij.psi.xml.XmlFile;
 import com.intellij.util.ui.tree.TreeUtil;
+import org.springirun.completion.SpringirunCompletionUtils;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -160,20 +166,34 @@ public class ContextManagerEditorDialog extends JDialog {
                     XmlFileType.INSTANCE);
                 final VirtualFile file = FileChooser.chooseFile(project, descriptor);
                 if (file != null) {
-                    ContextContainerEntity contextContainerEntity = new ContextContainerEntity();
-
-                    String relPath = FileUtil.getRelativePath(project.getBasePath(), file.getPresentableUrl(),
-                        File.separatorChar);
-                    contextContainerEntity.setName(relPath);
-                    contextContainerEntity.setParentContextContainerEntity(contextTreeNode.getContextContainerEntity());
-                    List<ContextContainerEntity> children = contextTreeNode.getContextContainerEntity().getChildContextContainers();
-                    if (children == null) {
-                        children = new ArrayList<ContextContainerEntity>();
-                        contextTreeNode.getContextContainerEntity().setChildContextContainers(children);
+                    PsiFile psiFile = SpringirunCompletionUtils.resolvePsiFile(project, file);
+                    if (psiFile == null ||
+                        !(psiFile instanceof XmlFile) ||
+                        !XmlPatterns.xmlTag().withLocalName(SpringirunCompletionUtils.BEANS).withNamespace(
+                            SpringirunCompletionUtils.BEAN_NAMESPACE).accepts(((XmlFile) psiFile).getRootTag())) {
+                        Messages.showMessageDialog(project, "File is not valid spring beans file.", "Springirun",
+                            null);
+                        return;
                     }
+                    ContextContainerEntity contextContainerEntity = createContextContainerEntity(
+                        contextTreeNode.getContextContainerEntity(), file, project);
+                    contextContainerEntity.setContextFile(psiFile);
                     contextTreeNode.insert(new ContextTreeNode(contextContainerEntity), -1);
                     currentContextTree.updateUI();
                     TreeUtil.expandAll(currentContextTree);
+                }
+            }
+        });
+        buttonAdd.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                String context = Messages.showInputDialog(project, "Create new context", "Springirun", null);
+                if (context != null && !context.isEmpty()) {
+                    ContextContainerEntity contextContainerEntity = new ContextContainerEntity();
+                    contextContainerEntity.setName(context);
+                    contextContainerEntity.setRoot(true);
+                    contextContainer.getContextContainerRootEntities().add(contextContainerEntity);
+                    contextTable.updateUI();
                 }
             }
         });
@@ -183,6 +203,22 @@ public class ContextManagerEditorDialog extends JDialog {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    private ContextContainerEntity createContextContainerEntity(final ContextContainerEntity parentContextContainer,
+        final VirtualFile file, final Project project) {
+        ContextContainerEntity contextContainerEntity = new ContextContainerEntity();
+
+        String relPath = FileUtil.getRelativePath(project.getBasePath(), file.getPresentableUrl(), File.separatorChar);
+        contextContainerEntity.setName(file.getName());
+        contextContainerEntity.setContextPath(relPath);
+        contextContainerEntity.setParentContextContainerEntity(parentContextContainer);
+        List<ContextContainerEntity> children = parentContextContainer.getChildContextContainers();
+        if (children == null) {
+            children = new ArrayList<ContextContainerEntity>();
+            parentContextContainer.setChildContextContainers(children);
+        }
+        return contextContainerEntity;
     }
 
     private void onOK() {

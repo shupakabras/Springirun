@@ -21,8 +21,16 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.OrderEnumerator;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.FileViewProvider;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.impl.source.xml.XmlFileImpl;
+import com.intellij.psi.xml.XmlFile;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
+import org.springirun.completion.SpringirunCompletionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +50,12 @@ import java.util.List;
 public class ContextPersistentStateComponent implements PersistentStateComponent<Element> {
 
     private ContextContainer contextContainer = new ContextContainer();
+
+    protected Project project;
+
+    public ContextPersistentStateComponent(Project project) {
+        this.project = project;
+    }
 
     public static ContextPersistentStateComponent getInstance(Project project) {
         return ServiceManager.getService(project, ContextPersistentStateComponent.class);
@@ -97,6 +111,11 @@ public class ContextPersistentStateComponent implements PersistentStateComponent
         ContextContainerEntity contextContainerEntity = new ContextContainerEntity();
         contextContainerEntity.setName(element.getAttribute("name").getValue());
         contextContainerEntity.setRoot(element.getAttribute("root").getBooleanValue());
+        if (!contextContainerEntity.isRoot()) {
+            contextContainerEntity.setContextPath(element.getAttribute("contextPath").getValue());
+            contextContainerEntity.setContextFile(SpringirunCompletionUtils.resolvePsiFile(project,
+                contextContainerEntity.getContextPath()));
+        }
         contextContainerEntity.setParentContextContainerEntity(parentEntity);
         List<ContextContainerEntity> contextContainerEntityList = new ArrayList<ContextContainerEntity>();
         for (Object childEntity: element.getChildren("ContextContainerEntity")) {
@@ -111,6 +130,9 @@ public class ContextPersistentStateComponent implements PersistentStateComponent
         Element element = new Element("ContextContainerEntity");
         element.setAttribute("name", contextContainer.getName());
         element.setAttribute("root", String.valueOf(contextContainer.isRoot()));
+        if (!contextContainer.isRoot()) {
+            element.setAttribute("contextPath", contextContainer.getContextPath());
+        }
         if (contextContainer.getChildContextContainers() != null) {
             for (ContextContainerEntity contextContainerEntity: contextContainer.getChildContextContainers()) {
                 element.addContent(createContextContainerEntityElement(contextContainerEntity));

@@ -16,10 +16,16 @@
 
 package org.springirun.completion;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiPrimitiveType;
@@ -31,6 +37,7 @@ import com.intellij.util.xml.DomManager;
 import org.springirun.model.Alias;
 import org.springirun.model.Bean;
 import org.springirun.model.Beans;
+import org.springirun.tool.ContextContainer;
 
 import javax.swing.Icon;
 import java.util.ArrayList;
@@ -53,6 +60,7 @@ public class SpringirunCompletionUtils {
     public static final String PROPERTY = "property";
     public static final String NAME = "name";
     public static final String BEAN = "bean";
+    public static final String BEANS = "beans";
     public static final String INIT_METHOD = "init-method";
     public static final String BEAN_REF = "bean-ref";
     public static final String VALUE_REF = "value-ref";
@@ -185,6 +193,10 @@ public class SpringirunCompletionUtils {
         return resolveBean(beanTag, null);
     }
 
+    public static final void mutliResolve() {
+        ContextContainer contextContainer;
+    }
+
     private static PsiClass nestedBeanClassResolving(XmlAttribute parent, XmlAttribute factoryMethodAttribute) {
         Beans beans = getDocumentRoot(parent);
         PsiClass resolvedClass = resolveBeanClassByName(beans, parent.getValue());
@@ -252,6 +264,24 @@ public class SpringirunCompletionUtils {
             if (psiElement instanceof  PsiClass) {
                 return (PsiClass) psiElement;
 
+            }
+        }
+        return null;
+    }
+
+    public static PsiFile resolvePsiFile(Project project, VirtualFile virtualFile) {
+        FileViewProvider fileViewProvider = PsiManager.getInstance(project).findViewProvider(virtualFile);
+        if (fileViewProvider != null) {
+            return fileViewProvider.getPsi(fileViewProvider.getBaseLanguage());
+        }
+        return null;
+    }
+
+    public static PsiFile resolvePsiFile(Project project, String contextPath) {
+        for (VirtualFile fileOrDir : OrderEnumerator.orderEntries(project).getAllSourceRoots()) {
+            VirtualFile virtualFile = fileOrDir.findFileByRelativePath(contextPath);
+            if (virtualFile != null && !virtualFile.isDirectory()) {
+                return resolvePsiFile(project, virtualFile);
             }
         }
         return null;

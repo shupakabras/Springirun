@@ -15,6 +15,8 @@
  */
 package org.springirun.tool;
 
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
 import com.intellij.util.xmlb.annotations.AbstractCollection;
 import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
@@ -35,6 +37,12 @@ public class ContextContainerEntity {
 
     @Attribute("root")
     private boolean isRoot;
+
+    @Attribute("contextPath")
+    private String contextPath;
+
+    @Transient
+    private PsiFile contextFile;
 
     @Transient
     private ContextContainerEntity parentContextContainerEntity;
@@ -84,6 +92,22 @@ public class ContextContainerEntity {
 
     public void setChildContextContainers(final List<ContextContainerEntity> childContextContainers) {
         this.childContextContainers = childContextContainers;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public void setContextPath(final String contextPath) {
+        this.contextPath = contextPath;
+    }
+
+    public PsiFile getContextFile() {
+        return contextFile;
+    }
+
+    public void setContextFile(final PsiFile contextFile) {
+        this.contextFile = contextFile;
     }
 
     @Override
