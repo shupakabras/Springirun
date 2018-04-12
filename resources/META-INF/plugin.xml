@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>org.springirun.Springirun</id>
+    <id>Springirun</id>
     <name>Springirun</name>
     <description>Spring Framework integration plugin for IntellijIDEA Community Edition</description>
     <version>0.2</version>
