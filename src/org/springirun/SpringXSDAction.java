@@ -15,15 +15,14 @@
  */
 package org.springirun;
 
+import com.intellij.ide.actions.ShowSettingsUtilImpl;
+import com.intellij.javaee.ExternalResourceConfigurable;
 import com.intellij.javaee.ExternalResourceManager;
 import com.intellij.javaee.ExternalResourceManagerEx;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.options.ConfigurableGroup;
-import com.intellij.openapi.options.ex.IdeConfigurablesGroup;
-import com.intellij.openapi.options.ex.ProjectConfigurablesGroup;
-import com.intellij.openapi.options.newEditor.OptionsEditorDialog;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.roots.OrderEnumerator;
@@ -132,10 +131,7 @@ public class SpringXSDAction extends AnAction {
             }
         });
 
-
-        ConfigurableGroup[] groups = new ConfigurableGroup[] {new ProjectConfigurablesGroup(e.getProject()),
-                                                              new IdeConfigurablesGroup()};
-        new OptionsEditorDialog(e.getProject(), groups, "com.intellij.javaee.ExternalResourceConfigurable").show();
+        ShowSettingsUtil.getInstance().showSettingsDialog(e.getProject(), ExternalResourceConfigurable.class);
     }
 
 }

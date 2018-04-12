@@ -1,0 +1,65 @@
+<idea-plugin>
+    <id>org.springirun.Springirun</id>
+    <name>Springirun</name>
+    <description>Spring Framework integration plugin for IntellijIDEA Community Edition</description>
+    <version>0.2</version>
+    <vendor email="shupakabras@gmail.com">Andrii Borovyk</vendor>
+
+    <description>
+        <![CDATA[
+<p>Intellij IDEA Community Edition support Spring configuration files.</p>
+]]>
+    </description>
+    <change-notes>
+        <![CDATA[
+<h3>0.1 features:</h3>
+<ul>
+<li>[feature] basic spring xml files support</li>
+<li>[feature] auto-import of spring.schema xsd from classpath (Main Menu:Springirun->Re-import schemas)</li>
+<li>[feature] p-context referencing and completion</li>
+<li>[feature] init-method, factory-method, property#name referencing and completion</li>
+<li>[feature] bean referencing and completion (only for current xml)</li>
+</ul>
+
+<h3>0.2 Updated to 2018.1</h3>
+]]>
+    </change-notes>
+    <idea-version since-build="181"/>
+
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
+
+    <project-components>
+        <!-- Add your project components here -->
+    </project-components>
+
+    <extensions defaultExtensionNs="com.intellij">
+
+        <completion.contributor language="XML"
+                                implementationClass="org.springirun.completion.SpringirunCompletionContributor"/>
+        <psi.referenceContributor language="XML"
+                                  implementation="org.springirun.reference.SpringirunReferenceContributor"/>
+        <dom.fileDescription implementation="org.springirun.model.BeansFileDescriptor"/>
+
+        <projectService serviceImplementation="org.springirun.tool.ContextPersistentStateComponent"/>
+
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <group id="Springirun.ActionGroup" text="Springirun" description="Springirun plugin">
+            <action id="Springirun.Reimport" text="Re-import schemas"
+                    description="Re-import Spring XSD files"
+                    class="org.springirun.SpringXSDAction">
+            </action>
+            <action id="Springirun.ContextManager" text="Context Manager"
+                    description="Show context manager"
+                    class="org.springirun.tool.ContextManagerEditorAction" icon="/images/bean.png">
+
+            </action>
+            <add-to-group group-id="MainMenu" anchor="last"/>
+        </group>
+    </actions>
+
+</idea-plugin>

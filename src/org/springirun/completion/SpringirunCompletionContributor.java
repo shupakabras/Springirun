@@ -44,13 +44,11 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
     // p-context contributor
     CompletionProvider<CompletionParameters> pContextCompletionProvider
-        = new CompletionProvider<CompletionParameters>() {
+            = new CompletionProvider<CompletionParameters>() {
         @Override
         protected void addCompletions(
-            @NotNull
-            final CompletionParameters parameters, final ProcessingContext context,
-            @NotNull
-            final CompletionResultSet result) {
+                @NotNull final CompletionParameters parameters, final ProcessingContext context,
+                @NotNull final CompletionResultSet result) {
 
             final PsiElement element = parameters.getPosition();
 
@@ -67,9 +65,8 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
             if (psiClass != null) {
                 for (String method : SpringirunCompletionUtils.resolveSetters(psiClass, namePrefix, namespacePrefix)) {
-                    result.addElement(LookupElementBuilder.create(method).setIcon(PlatformIcons.METHOD_ICON));
-                    result.addElement(LookupElementBuilder.create(method + SpringirunCompletionUtils._REF).setIcon
-                        (SpringirunCompletionUtils.BEAN_METHOD_ICON));
+                    result.addElement(LookupElementBuilder.create(method).withIcon(PlatformIcons.METHOD_ICON));
+                    result.addElement(LookupElementBuilder.create(method + SpringirunCompletionUtils._REF).withIcon(SpringirunCompletionUtils.BEAN_METHOD_ICON));
                 }
             }
         }
@@ -77,14 +74,12 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
     //property#name contributor
     CompletionProvider<CompletionParameters> propertyNameCompletionProvider
-        = new CompletionProvider<CompletionParameters>() {
+            = new CompletionProvider<CompletionParameters>() {
 
         @Override
         protected void addCompletions(
-            @NotNull
-            final CompletionParameters parameters, final ProcessingContext context,
-            @NotNull
-            final CompletionResultSet result) {
+                @NotNull final CompletionParameters parameters, final ProcessingContext context,
+                @NotNull final CompletionResultSet result) {
             final PsiElement element = parameters.getPosition();
 
             if (!(element.getParent().getParent().getParent().getParent() instanceof XmlTag)) {
@@ -97,7 +92,7 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
             if (psiClass != null) {
                 for (String method : SpringirunCompletionUtils.resolveSetters(psiClass, prefix)) {
-                    result.addElement(LookupElementBuilder.create(method).setIcon(PlatformIcons.PROPERTY_ICON));
+                    result.addElement(LookupElementBuilder.create(method).withIcon(PlatformIcons.PROPERTY_ICON));
                 }
             }
 
@@ -106,13 +101,11 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
     //factory-method contributor
     CompletionProvider<CompletionParameters> valuedMethodCompletionProvider
-        = new CompletionProvider<CompletionParameters>() {
+            = new CompletionProvider<CompletionParameters>() {
         @Override
         protected void addCompletions(
-            @NotNull
-            final CompletionParameters parameters, final ProcessingContext context,
-            @NotNull
-            final CompletionResultSet result) {
+                @NotNull final CompletionParameters parameters, final ProcessingContext context,
+                @NotNull final CompletionResultSet result) {
             final PsiElement element = parameters.getPosition();
 
             if (!(element.getParent().getParent().getParent() instanceof XmlTag)) {
@@ -126,8 +119,8 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
             if (psiClass != null) {
                 for (String method : SpringirunCompletionUtils.resolveMethods(psiClass, prefix,
-                    MethodReturnType.VALUED)) {
-                    result.addElement(LookupElementBuilder.create(method).setIcon(PlatformIcons.METHOD_ICON));
+                        MethodReturnType.VALUED)) {
+                    result.addElement(LookupElementBuilder.create(method).withIcon(PlatformIcons.METHOD_ICON));
                 }
             }
         }
@@ -135,13 +128,11 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
     //init-method contributor
     CompletionProvider<CompletionParameters> voidMethodCompletionProvider
-        = new CompletionProvider<CompletionParameters>() {
+            = new CompletionProvider<CompletionParameters>() {
         @Override
         protected void addCompletions(
-            @NotNull
-            final CompletionParameters parameters, final ProcessingContext context,
-            @NotNull
-            final CompletionResultSet result) {
+                @NotNull final CompletionParameters parameters, final ProcessingContext context,
+                @NotNull final CompletionResultSet result) {
             final PsiElement element = parameters.getPosition();
 
             if (!(element.getParent().getParent().getParent() instanceof XmlTag)) {
@@ -155,8 +146,8 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
             if (psiClass != null) {
                 for (String method : SpringirunCompletionUtils.resolveMethods(psiClass, prefix,
-                    MethodReturnType.VOID)) {
-                    result.addElement(LookupElementBuilder.create(method).setIcon(PlatformIcons.METHOD_ICON));
+                        MethodReturnType.VOID)) {
+                    result.addElement(LookupElementBuilder.create(method).withIcon(PlatformIcons.METHOD_ICON));
                 }
             }
         }
@@ -173,19 +164,17 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
             final Beans beans = SpringirunCompletionUtils.getDocumentRoot(xmlAttribute);
 
-            for (Bean bean: beans.getBeans()) {
+            for (Bean bean : beans.getBeans()) {
                 if (bean.getId().getValue() != null && bean.getId().getValue().startsWith(prefix)) {
-                     result.addElement(LookupElementBuilder.create(bean.getId().getValue()).setIcon
-                         (SpringirunCompletionUtils.BEAN_ICON));
+                    result.addElement(LookupElementBuilder.create(bean.getId().getValue()).withIcon(SpringirunCompletionUtils.BEAN_ICON));
                 }
                 if (bean.getName().getValue() != null && bean.getName().getValue().startsWith(prefix)) {
-                    result.addElement(LookupElementBuilder.create(bean.getName().getValue()).setIcon(SpringirunCompletionUtils.BEAN_ICON));
+                    result.addElement(LookupElementBuilder.create(bean.getName().getValue()).withIcon(SpringirunCompletionUtils.BEAN_ICON));
                 }
             }
-            for (Alias alias: beans.getAliases()) {
+            for (Alias alias : beans.getAliases()) {
                 if (alias.getAlias().getValue() != null && alias.getAlias().getValue().startsWith(prefix)) {
-                    result.addElement(LookupElementBuilder.create(alias.getAlias().getValue()).setIcon
-                        (SpringirunCompletionUtils.BEAN_ALIAS_ICON));
+                    result.addElement(LookupElementBuilder.create(alias.getAlias().getValue()).withIcon(SpringirunCompletionUtils.BEAN_ALIAS_ICON));
                 }
             }
         }
@@ -193,49 +182,49 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
     public SpringirunCompletionContributor() {
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttribute().withNamespace(
-            SpringirunCompletionUtils.P_NAMESPACE)), pContextCompletionProvider);
+                SpringirunCompletionUtils.P_NAMESPACE)), pContextCompletionProvider);
 
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue().inside(
-            XmlPatterns.xmlAttribute(SpringirunCompletionUtils.NAME).inside(XmlPatterns.xmlTag().withLocalName(
-                SpringirunCompletionUtils.PROPERTY).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
-            propertyNameCompletionProvider);
+                XmlPatterns.xmlAttribute(SpringirunCompletionUtils.NAME).inside(XmlPatterns.xmlTag().withLocalName(
+                        SpringirunCompletionUtils.PROPERTY).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
+                propertyNameCompletionProvider);
 
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue().inside(
-            XmlPatterns.xmlAttribute().withName(StandardPatterns.string().oneOf(
-                SpringirunCompletionUtils.FACTORY_METHOD)).inside(XmlPatterns.xmlTag().withLocalName(
-                SpringirunCompletionUtils.BEAN).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
-            valuedMethodCompletionProvider);
+                XmlPatterns.xmlAttribute().withName(StandardPatterns.string().oneOf(
+                        SpringirunCompletionUtils.FACTORY_METHOD)).inside(XmlPatterns.xmlTag().withLocalName(
+                        SpringirunCompletionUtils.BEAN).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
+                valuedMethodCompletionProvider);
 
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue().inside(
-            XmlPatterns.xmlAttribute().withName(StandardPatterns.string().oneOf(
-                SpringirunCompletionUtils.INIT_METHOD)).inside(XmlPatterns.xmlTag().withLocalName(
-                SpringirunCompletionUtils.BEAN).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
-            voidMethodCompletionProvider);
+                XmlPatterns.xmlAttribute().withName(StandardPatterns.string().oneOf(
+                        SpringirunCompletionUtils.INIT_METHOD)).inside(XmlPatterns.xmlTag().withLocalName(
+                        SpringirunCompletionUtils.BEAN).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
+                voidMethodCompletionProvider);
 
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue().withParent(
-            XmlPatterns.xmlAttribute().withName(StandardPatterns.string().oneOf(SpringirunCompletionUtils.VALUE_REF,
-            SpringirunCompletionUtils.BEAN_REF, SpringirunCompletionUtils.PARENT, SpringirunCompletionUtils.FACTORY_BEAN)))),
-            beansReferenceCompletionProvider);
+                XmlPatterns.xmlAttribute().withName(StandardPatterns.string().oneOf(SpringirunCompletionUtils.VALUE_REF,
+                        SpringirunCompletionUtils.BEAN_REF, SpringirunCompletionUtils.PARENT, SpringirunCompletionUtils.FACTORY_BEAN)))),
+                beansReferenceCompletionProvider);
 
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue().withParent(
-            XmlPatterns.xmlAttribute(SpringirunCompletionUtils.BEAN).withParent(XmlPatterns.xmlTag().withLocalName
-            (SpringirunCompletionUtils.REF).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
-            beansReferenceCompletionProvider);
+                XmlPatterns.xmlAttribute(SpringirunCompletionUtils.BEAN).withParent(XmlPatterns.xmlTag().withLocalName
+                        (SpringirunCompletionUtils.REF).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
+                beansReferenceCompletionProvider);
 
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue().withParent(
-            XmlPatterns.xmlAttribute(SpringirunCompletionUtils.REF).withParent(XmlPatterns.xmlTag().withLocalName
-            (SpringirunCompletionUtils.PROPERTY).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
-            beansReferenceCompletionProvider);
+                XmlPatterns.xmlAttribute(SpringirunCompletionUtils.REF).withParent(XmlPatterns.xmlTag().withLocalName
+                        (SpringirunCompletionUtils.PROPERTY).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
+                beansReferenceCompletionProvider);
 
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue().withParent(
-            XmlPatterns.xmlAttribute().withName(StandardPatterns.string().endsWith(SpringirunCompletionUtils._REF))
-            .withNamespace(SpringirunCompletionUtils.P_NAMESPACE))),
-            beansReferenceCompletionProvider);
+                XmlPatterns.xmlAttribute().withName(StandardPatterns.string().endsWith(SpringirunCompletionUtils._REF))
+                        .withNamespace(SpringirunCompletionUtils.P_NAMESPACE))),
+                beansReferenceCompletionProvider);
 
         extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue().withParent(
-            XmlPatterns.xmlAttribute(SpringirunCompletionUtils.NAME).withParent(XmlPatterns.xmlTag().withLocalName
-            (SpringirunCompletionUtils.ALIAS).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
-            beansReferenceCompletionProvider);
+                XmlPatterns.xmlAttribute(SpringirunCompletionUtils.NAME).withParent(XmlPatterns.xmlTag().withLocalName
+                        (SpringirunCompletionUtils.ALIAS).withNamespace(SpringirunCompletionUtils.BEAN_NAMESPACE)))),
+                beansReferenceCompletionProvider);
 
     }
 }

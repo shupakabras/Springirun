@@ -19,15 +19,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.components.StorageScheme;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.OrderEnumerator;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.FileViewProvider;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.impl.source.xml.XmlFileImpl;
-import com.intellij.psi.xml.XmlFile;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 import org.springirun.completion.SpringirunCompletionUtils;
@@ -41,11 +33,8 @@ import java.util.List;
  * @author Andrii Borovyk
  */
 @State(
-    name = "SpringirunConfiguration",
-    storages = {
-        @Storage(id = "default", file = "$PROJECT_FILE$"),
-        @Storage(id = "dir", file = "$PROJECT_CONFIG_DIR$/springirun.xml", scheme = StorageScheme.DIRECTORY_BASED)
-    }
+        name = "SpringirunConfiguration",
+        storages = @Storage("springirun.xml")
 )
 public class ContextPersistentStateComponent implements PersistentStateComponent<Element> {
 
@@ -65,7 +54,7 @@ public class ContextPersistentStateComponent implements PersistentStateComponent
     public Element getState() {
         Element contentContainerElement = new Element("ContextContainer");
         if (contextContainer.getContextContainerRootEntities() != null) {
-            for (ContextContainerEntity contextContainerEntity: contextContainer.getContextContainerRootEntities()) {
+            for (ContextContainerEntity contextContainerEntity : contextContainer.getContextContainerRootEntities()) {
                 contentContainerElement.addContent(createContextContainerEntityElement(contextContainerEntity));
             }
         }
@@ -82,10 +71,9 @@ public class ContextPersistentStateComponent implements PersistentStateComponent
         try {
             for (Object element : state.getChildren("ContextContainerEntity")) {
                 contextContainer.getContextContainerRootEntities()
-                                .add(createContextContainerEntity((Element) element, null));
+                        .add(createContextContainerEntity((Element) element, null));
             }
-        }
-        catch (DataConversionException e) {
+        } catch (DataConversionException e) {
             e.printStackTrace();
         }
         return contextContainer;
@@ -97,30 +85,29 @@ public class ContextPersistentStateComponent implements PersistentStateComponent
         try {
             for (Object element : state.getChildren("ContextContainerEntity")) {
                 contextContainer.getContextContainerRootEntities()
-                                .add(createContextContainerEntity((Element) element, null));
+                        .add(createContextContainerEntity((Element) element, null));
             }
-        }
-        catch (DataConversionException e) {
+        } catch (DataConversionException e) {
             e.printStackTrace();
         }
 
     }
 
     private ContextContainerEntity createContextContainerEntity(Element element, ContextContainerEntity parentEntity)
-        throws DataConversionException {
+            throws DataConversionException {
         ContextContainerEntity contextContainerEntity = new ContextContainerEntity();
         contextContainerEntity.setName(element.getAttribute("name").getValue());
         contextContainerEntity.setRoot(element.getAttribute("root").getBooleanValue());
         if (!contextContainerEntity.isRoot()) {
             contextContainerEntity.setContextPath(element.getAttribute("contextPath").getValue());
             contextContainerEntity.setContextFile(SpringirunCompletionUtils.resolvePsiFile(project,
-                contextContainerEntity.getContextPath()));
+                    contextContainerEntity.getContextPath()));
         }
         contextContainerEntity.setParentContextContainerEntity(parentEntity);
         List<ContextContainerEntity> contextContainerEntityList = new ArrayList<ContextContainerEntity>();
-        for (Object childEntity: element.getChildren("ContextContainerEntity")) {
+        for (Object childEntity : element.getChildren("ContextContainerEntity")) {
             contextContainerEntityList.add(createContextContainerEntity((Element) childEntity,
-                contextContainerEntity));
+                    contextContainerEntity));
         }
         contextContainerEntity.setChildContextContainers(contextContainerEntityList);
         return contextContainerEntity;
@@ -134,7 +121,7 @@ public class ContextPersistentStateComponent implements PersistentStateComponent
             element.setAttribute("contextPath", contextContainer.getContextPath());
         }
         if (contextContainer.getChildContextContainers() != null) {
-            for (ContextContainerEntity contextContainerEntity: contextContainer.getChildContextContainers()) {
+            for (ContextContainerEntity contextContainerEntity : contextContainer.getChildContextContainers()) {
                 element.addContent(createContextContainerEntityElement(contextContainerEntity));
             }
 

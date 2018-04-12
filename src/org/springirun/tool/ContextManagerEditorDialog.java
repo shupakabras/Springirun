@@ -25,29 +25,13 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.XmlPatterns;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.util.ui.tree.TreeUtil;
 import org.springirun.completion.SpringirunCompletionUtils;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JTable;
-import javax.swing.JTree;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,17 +59,9 @@ public class ContextManagerEditorDialog extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        buttonOK.addActionListener(e -> onOK());
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        buttonCancel.addActionListener(e -> onCancel());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -104,10 +80,10 @@ public class ContextManagerEditorDialog extends JDialog {
             @Override
             public void mouseClicked(final MouseEvent mouseEvent) {
                 ContextContainerEntity contextContainerEntity =
-                    (ContextContainerEntity) contextTable.getValueAt(contextTable.getSelectedRow(), -1);
+                        (ContextContainerEntity) contextTable.getValueAt(contextTable.getSelectedRow(), -1);
 
                 ((ContextTableModel) contextTable.getModel()).getContextContainer().getContextContainerRootEntities()
-                                                             .remove(contextContainerEntity);
+                        .remove(contextContainerEntity);
 
                 contextTable.updateUI();
                 currentContextTree.setModel(new DefaultTreeModel(null));
@@ -118,10 +94,10 @@ public class ContextManagerEditorDialog extends JDialog {
         contextTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(final MouseEvent mouseEvent) {
-                if (!(((ContextTableModel)contextTable.getModel()).getContextContainer()
+                if (!(((ContextTableModel) contextTable.getModel()).getContextContainer()
                         .getContextContainerRootEntities().isEmpty())) {
                     ContextContainerEntity contextContainerEntity =
-                    (ContextContainerEntity) contextTable.getModel().getValueAt(contextTable.getSelectedRow(), 1);
+                            (ContextContainerEntity) contextTable.getModel().getValueAt(contextTable.getSelectedRow(), 1);
                     currentContextTree.setModel(new DefaultTreeModel(new ContextTreeNode(contextContainerEntity)));
                     currentContextTree.updateUI();
                 }
@@ -145,68 +121,54 @@ public class ContextManagerEditorDialog extends JDialog {
         treePopupMenu.add(addToContext);
         treePopupMenu.add(removeFromContext);
 
-        removeFromContext.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                ContextTreeNode contextTreeNode = (ContextTreeNode) currentContextTree.getLastSelectedPathComponent();
-                if (contextTreeNode.getParent() != null) {
-                    ((ContextTreeNode) contextTreeNode.getParent()).remove(contextTreeNode);
-                    currentContextTree.updateUI();
-                    TreeUtil.expandAll(currentContextTree);
-                }
-
+        removeFromContext.addActionListener(e -> {
+            ContextTreeNode contextTreeNode = (ContextTreeNode) currentContextTree.getLastSelectedPathComponent();
+            if (contextTreeNode.getParent() != null) {
+                ((ContextTreeNode) contextTreeNode.getParent()).remove(contextTreeNode);
+                currentContextTree.updateUI();
+                TreeUtil.expandAll(currentContextTree);
             }
         });
 
-        addToContext.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent actionEvent) {
-                ContextTreeNode contextTreeNode = (ContextTreeNode) currentContextTree.getLastSelectedPathComponent();
-                final FileChooserDescriptor descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(
+        addToContext.addActionListener(actionEvent -> {
+            ContextTreeNode contextTreeNode = (ContextTreeNode) currentContextTree.getLastSelectedPathComponent();
+            final FileChooserDescriptor descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(
                     XmlFileType.INSTANCE);
-                final VirtualFile file = FileChooser.chooseFile(project, descriptor);
-                if (file != null) {
-                    PsiFile psiFile = SpringirunCompletionUtils.resolvePsiFile(project, file);
-                    if (psiFile == null ||
+            final VirtualFile file = FileChooser.chooseFile(descriptor, project, null);
+            if (file != null) {
+                PsiFile psiFile = SpringirunCompletionUtils.resolvePsiFile(project, file);
+                if (psiFile == null ||
                         !(psiFile instanceof XmlFile) ||
                         !XmlPatterns.xmlTag().withLocalName(SpringirunCompletionUtils.BEANS).withNamespace(
-                            SpringirunCompletionUtils.BEAN_NAMESPACE).accepts(((XmlFile) psiFile).getRootTag())) {
-                        Messages.showMessageDialog(project, "File is not valid spring beans file.", "Springirun",
+                                SpringirunCompletionUtils.BEAN_NAMESPACE).accepts(((XmlFile) psiFile).getRootTag())) {
+                    Messages.showMessageDialog(project, "File is not valid spring beans file.", "Springirun",
                             null);
-                        return;
-                    }
-                    ContextContainerEntity contextContainerEntity = createContextContainerEntity(
-                        contextTreeNode.getContextContainerEntity(), file, project);
-                    contextContainerEntity.setContextFile(psiFile);
-                    contextTreeNode.insert(new ContextTreeNode(contextContainerEntity), -1);
-                    currentContextTree.updateUI();
-                    TreeUtil.expandAll(currentContextTree);
+                    return;
                 }
+                ContextContainerEntity contextContainerEntity = createContextContainerEntity(
+                        contextTreeNode.getContextContainerEntity(), file, project);
+                contextContainerEntity.setContextFile(psiFile);
+                contextTreeNode.insert(new ContextTreeNode(contextContainerEntity), -1);
+                currentContextTree.updateUI();
+                TreeUtil.expandAll(currentContextTree);
             }
         });
-        buttonAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                String context = Messages.showInputDialog(project, "Create new context", "Springirun", null);
-                if (context != null && !context.isEmpty()) {
-                    ContextContainerEntity contextContainerEntity = new ContextContainerEntity();
-                    contextContainerEntity.setName(context);
-                    contextContainerEntity.setRoot(true);
-                    contextContainer.getContextContainerRootEntities().add(contextContainerEntity);
-                    contextTable.updateUI();
-                }
+        buttonAdd.addActionListener(e -> {
+            String context = Messages.showInputDialog(project, "Create new context", "Springirun", null);
+            if (context != null && !context.isEmpty()) {
+                ContextContainerEntity contextContainerEntity = new ContextContainerEntity();
+                contextContainerEntity.setName(context);
+                contextContainerEntity.setRoot(true);
+                contextContainer.getContextContainerRootEntities().add(contextContainerEntity);
+                contextTable.updateUI();
             }
         });
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private ContextContainerEntity createContextContainerEntity(final ContextContainerEntity parentContextContainer,
-        final VirtualFile file, final Project project) {
+                                                                final VirtualFile file, final Project project) {
         ContextContainerEntity contextContainerEntity = new ContextContainerEntity();
 
         String relPath = FileUtil.getRelativePath(project.getBasePath(), file.getPresentableUrl(), File.separatorChar);

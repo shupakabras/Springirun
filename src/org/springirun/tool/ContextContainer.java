@@ -15,9 +15,9 @@
  */
 package org.springirun.tool;
 
-import com.intellij.util.xmlb.annotations.AbstractCollection;
 import com.intellij.util.xmlb.annotations.Property;
 import com.intellij.util.xmlb.annotations.Tag;
+import com.intellij.util.xmlb.annotations.XCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.List;
 public class ContextContainer {
 
     @Property(surroundWithTag = false)
-    @AbstractCollection(surroundWithTag = false)
+    @XCollection
     private List<ContextContainerEntity> contextContainerRootEntities = new ArrayList<ContextContainerEntity>();
 
     public List<ContextContainerEntity> getContextContainerRootEntities() {
