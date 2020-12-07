@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij' version '0.6.5'
+}
+
+group 'org.springirun'
+version '0.3'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version '2020.2'
+    plugins = ['com.intellij.java']
+}
+patchPluginXml {
+    sinceBuild(202)
+    untilBuild(null)
+    changeNotes """
+      Update to 2020.2 version support.<br>
+      """
+}

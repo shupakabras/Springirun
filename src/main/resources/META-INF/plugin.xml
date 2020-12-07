@@ -1,0 +1,47 @@
+<idea-plugin>
+    <id>Springirun</id>
+    <name>Springirun</name>
+    <description>Spring Framework integration plugin for IntellijIDEA Community Edition
+    </description>
+    <version>0.2</version>
+    <vendor email="shupakabras@gmail.com">Andrii Borovyk</vendor>
+
+    <description>
+        <![CDATA[
+<p>Intellij IDEA Community Edition support Spring configuration files.</p>
+]]>
+    </description>
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.xml</depends>
+    <extensions defaultExtensionNs="com.intellij">
+
+        <completion.contributor language="XML"
+                                implementationClass="org.springirun.completion.SpringirunCompletionContributor"/>
+        <psi.referenceContributor language="XML"
+                                  implementation="org.springirun.reference.SpringirunReferenceContributor"/>
+        <dom.fileDescription implementation="org.springirun.model.BeansFileDescriptor"/>
+
+        <projectService
+                serviceImplementation="org.springirun.tool.ContextPersistentStateComponent"/>
+
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <group id="Springirun.ActionGroup" text="Springirun" description="Springirun plugin">
+            <action id="Springirun.Reimport" text="Re-import schemas"
+                    description="Re-import Spring XSD files"
+                    class="org.springirun.SpringXSDAction">
+            </action>
+            <action id="Springirun.ContextManager" text="Context Manager"
+                    description="Show context manager"
+                    class="org.springirun.tool.ContextManagerEditorAction" icon="/images/bean.png">
+
+            </action>
+            <add-to-group group-id="MainMenu" anchor="last"/>
+        </group>
+    </actions>
+</idea-plugin>
