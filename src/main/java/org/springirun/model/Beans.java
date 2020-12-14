@@ -15,10 +15,19 @@
  */
 package org.springirun.model;
 
-import com.intellij.util.xml.DomElement;
-import com.intellij.util.xml.SubTagList;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.util.Key;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.xml.XmlElement;
+import com.intellij.psi.xml.XmlTag;
+import com.intellij.util.xml.*;
+import com.intellij.util.xml.reflect.AbstractDomChildrenDescription;
+import com.intellij.util.xml.reflect.DomGenericInfo;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.xml.bind.annotation.XmlElement;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -27,6 +36,7 @@ import java.util.List;
  * @author Andrii Borovyk
  */
 public interface Beans extends DomElement {
+
 
     @SubTagList("bean")
     List<Bean> getBeans();

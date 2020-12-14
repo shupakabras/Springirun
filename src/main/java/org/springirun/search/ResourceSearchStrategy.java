@@ -22,6 +22,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.xml.XmlAttribute;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract strategy for PsiFiles by name resolving.
@@ -38,8 +39,8 @@ public abstract class ResourceSearchStrategy {
 
     protected abstract VirtualFile[] prepareSourceRoots(XmlAttribute xmlAttribute);
 
-    public PsiFile[] resolveAcceptableFiles(XmlAttribute xmlAttribute) {
-        ArrayList<PsiFile> psiFiles = new ArrayList<PsiFile>();
+    public List<PsiFile> resolveAcceptableFiles(XmlAttribute xmlAttribute) {
+        List<PsiFile> psiFiles = new ArrayList<PsiFile>();
         for (VirtualFile fileOrDir: prepareSourceRoots(xmlAttribute)) {
             VirtualFile virtualFile = fileOrDir.findFileByRelativePath(reference);
             if (virtualFile == null) {
@@ -51,6 +52,6 @@ public abstract class ResourceSearchStrategy {
                 psiFiles.add(fileViewProvider.getPsi(fileViewProvider.getBaseLanguage()));
             }
         }
-        return psiFiles.toArray(new PsiFile[psiFiles.size()]);
+        return psiFiles;
     }
 }

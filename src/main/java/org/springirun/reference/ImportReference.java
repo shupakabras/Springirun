@@ -35,8 +35,11 @@ import org.springirun.search.ResourceSearchStrategy;
 import org.springirun.search.ResourceSearchStrategySelector;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.springirun.completion.SpringirunCompletionUtils.*;
 
 /**
  * Reference to imported resources.
@@ -47,23 +50,23 @@ public class ImportReference extends PsiReferenceBase.Poly<PsiElement> {
 
     private ResourceSearchStrategySelector resourceSearchStrategySelector = new ResourceSearchStrategySelector();
 
-    private ArrayList<ResolveResult> resolvedResults;
-
     public ImportReference(@NotNull final PsiElement element) {
         super(element);
-        XmlAttribute xmlAttribute = (XmlAttribute) getElement().getParent();
-        String reference = xmlAttribute.getValue();
-        ResourceSearchStrategy resourceSearchStrategy = resourceSearchStrategySelector.getSearchStrategy(reference);
-        PsiFile[] resolvedFiles = resourceSearchStrategy.resolveAcceptableFiles(xmlAttribute);
-        resolvedResults = new ArrayList<ResolveResult>();
-        for (PsiFile psiFile: resolvedFiles) {
-            resolvedResults.add(new PsiElementResolveResult(psiFile));
-        }
     }
 
     @NotNull
     @Override
     public ResolveResult[] multiResolve(final boolean incompleteCode) {
+
+        ArrayList<ResolveResult> resolvedResults = new ArrayList<>();
+        Optional<XmlAttribute> attribute = firstParentOf(XmlAttribute.class, myElement);
+        if (attribute.isPresent()) {
+            String reference = attribute.get().getValue();
+            ResourceSearchStrategy resourceSearchStrategy = resourceSearchStrategySelector.getSearchStrategy(reference);
+            resourceSearchStrategy.resolveAcceptableFiles(attribute.get()).stream()
+                .map(PsiElementResolveResult::new).forEach(resolvedResults::add);
+        }
+
         return resolvedResults.toArray(new ResolveResult[resolvedResults.size()]);
     }
 

@@ -17,12 +17,17 @@ package org.springirun.reference;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.springirun.completion.SpringirunCompletionUtils;
 import org.springirun.model.Alias;
 import org.springirun.model.Bean;
 import org.springirun.model.Beans;
+
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 
 /**
@@ -36,51 +41,23 @@ public class BeanIdReference extends PsiReferenceBase<PsiElement> {
 
     public BeanIdReference(@NotNull final PsiElement element) {
         super(element);
-
-        XmlAttribute xmlAttribute = (XmlAttribute) getElement().getParent();
-
-        final Beans beans = SpringirunCompletionUtils.getDocumentRoot(xmlAttribute);
-
-        Bean bean = resolveBeanByName(beans, xmlAttribute.getValue());
-        if (bean != null) {
-            this.bean = bean.getXmlElement();
-        }
-
-        //no beans yet found... try to resolve using alias
-        Alias alias = resolveAliasByName(beans, xmlAttribute.getValue());
-        if (alias != null) {
-            bean = resolveBeanByName(beans, alias.getName().getValue());
-            if (bean != null) {
-                this.bean = bean.getXmlElement();
-            }
-        }
     }
 
     @Override
     public PsiElement resolve() {
-        return bean;
-    }
+        Optional<XmlAttribute> attribute = SpringirunCompletionUtils.firstParentOf(XmlAttribute.class, getElement());
+        if (attribute.isPresent()) {
+            final Optional<Beans> beans = SpringirunCompletionUtils.getDocumentRoot(attribute);
 
-    private Bean resolveBeanByName(Beans beans, @NotNull String name) {
-        if (beans == null) {
-            return null;
-        }
-        for (Bean bean : beans.getBeans()) {
-            if (name.equals(bean.getId().getValue()) || name.equals(bean.getName().getValue())) {
-                return bean;
-            }
+            return SpringirunCompletionUtils.or(
+                () -> SpringirunCompletionUtils.resolveBeanByName(beans, attribute.get().getValue()),
+                () -> SpringirunCompletionUtils.resolveBeanByAlias(beans, attribute.get().getValue())
+            ).map(Bean::getXmlElement).orElse(null);
         }
         return null;
     }
 
-    private Alias resolveAliasByName(Beans beans, @NotNull String name) {
-        for (Alias alias : beans.getAliases()) {
-            if (name.equals(alias.getAlias().getValue())) {
-                return alias;
-            }
-        }
-        return null;
-    }
+
 
     @NotNull
     @Override

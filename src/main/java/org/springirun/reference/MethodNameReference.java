@@ -26,6 +26,8 @@ import com.intellij.psi.xml.XmlTag;
 import org.jetbrains.annotations.NotNull;
 import org.springirun.completion.SpringirunCompletionUtils;
 
+import static org.springirun.completion.SpringirunCompletionUtils.*;
+
 import java.util.Optional;
 
 /**
@@ -41,18 +43,10 @@ public class MethodNameReference extends PsiReferenceBase<PsiElement> {
   }
 
   @Override public PsiElement resolve() {
-    Optional<XmlAttribute> attribute = Optional.ofNullable(myElement)
-        .filter(XmlAttributeValue.class::isInstance).map(XmlAttributeValue.class::cast)
-        .map(XmlAttributeValue::getParent).filter(XmlAttribute.class::isInstance).map(XmlAttribute.class::cast);
 
-    Optional<XmlTag> parent = attribute.map(XmlAttribute::getParent).filter(XmlTag.class::isInstance)
-        .map(XmlTag.class::cast);
-
-    if (parent.isPresent()) {
-      PsiClass resolvedClass = SpringirunCompletionUtils.resolveBean(parent.get(), attribute);
-      return SpringirunCompletionUtils.resolveMethod(resolvedClass, attribute.get().getValue());
-    }
-    return null;
+    Optional<XmlAttribute> attribute = firstParentOf(XmlAttribute.class, myElement);
+    Optional<XmlTag> bean = firstParentOf(XmlTag.class, attribute, tagWithName(BEAN));
+    return bean.map(b -> resolveBean(b, attribute)).map(psi -> resolveMethod(psi, attribute.get().getValue())).orElse(null);
   }
 
   @NotNull @Override public Object[] getVariants() {

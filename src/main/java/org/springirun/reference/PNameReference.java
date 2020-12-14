@@ -28,6 +28,9 @@ import org.springirun.completion.SpringirunCompletionUtils;
 
 import java.util.Optional;
 
+import static org.springirun.completion.SpringirunCompletionUtils.*;
+import static org.springirun.completion.SpringirunCompletionUtils.resolveSetterMethod;
+
 /**
  * property#name reference support.
  *
@@ -43,15 +46,11 @@ public class PNameReference extends PsiReferenceBase<PsiElement> {
 
     @Override
     public PsiElement resolve() {
-        Optional<XmlAttributeValue> value = Optional.ofNullable(myElement)
-            .filter(XmlAttributeValue.class::isInstance).map(XmlAttributeValue.class::cast);
-        Optional<XmlTag> tag = value.map(PsiElement::getParent).map(PsiElement::getParent).map(PsiElement::getParent)
-            .filter(XmlTag.class::isInstance).map(XmlTag.class::cast);
-        if (tag.isPresent()) {
-            PsiClass resolvedClass = SpringirunCompletionUtils.resolveBean(tag.get());
-            return SpringirunCompletionUtils.resolveSetterMethod(resolvedClass, value.get().getValue());
-        }
-        return null;
+        Optional<XmlAttribute> attribute = firstParentOf(XmlAttribute.class, myElement);
+        Optional<XmlTag> bean = firstParentOf(XmlTag.class, attribute, tagWithName(BEAN));
+
+        return bean.map(SpringirunCompletionUtils::resolveBean)
+            .map(psi -> resolveSetterMethod(psi, attribute.get().getValue())).orElse(null);
     }
 
     @NotNull

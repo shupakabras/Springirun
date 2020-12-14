@@ -29,6 +29,8 @@ import org.springirun.completion.SpringirunCompletionUtils;
 
 import java.util.Optional;
 
+import static org.springirun.completion.SpringirunCompletionUtils.*;
+
 /**
  * p-context reference support.
  *
@@ -42,15 +44,13 @@ public class PContextReference extends PsiReferenceBase<PsiElement> {
 
     @Override
     public PsiElement resolve() {
-        Optional<XmlAttribute> attribute = Optional.ofNullable(myElement)
-            .map(PsiElement::getParent).filter(XmlAttribute.class::isInstance).map(XmlAttribute.class::cast);
-        Optional<XmlTag> tag = attribute.map(PsiElement::getParent).filter(XmlTag.class::isInstance)
-            .map(XmlTag.class::cast);
-        if (tag.isPresent()) {
-            PsiClass resolved = SpringirunCompletionUtils.resolveBean(tag.get());
-            return SpringirunCompletionUtils.resolveSetterMethod(resolved, attribute.get().getLocalName());
-        }
-        return null;
+
+        Optional<XmlAttribute> attribute = firstParentOf(XmlAttribute.class, myElement);
+        Optional<XmlTag> bean = firstParentOf(XmlTag.class, attribute, tagWithName(BEAN));
+
+        return bean.map(SpringirunCompletionUtils::resolveBean)
+            .map(psi -> resolveSetterMethod(psi, attribute.get().getLocalName())).orElse(null);
+
     }
 
     @NotNull

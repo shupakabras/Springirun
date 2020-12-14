@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'org.springirun'
-version '0.3'
+version '0.4'
 
 repositories {
     mavenCentral()
@@ -23,6 +23,7 @@ patchPluginXml {
     sinceBuild(202)
     untilBuild(null)
     changeNotes """
-      Update to 2020.2 version support.<br>
+      Fixed issue with Bean-Id resolving <br/>
+      Better handling of constructor-args
       """
 }

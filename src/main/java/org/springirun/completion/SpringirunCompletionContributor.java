@@ -26,9 +26,11 @@ import com.intellij.patterns.StandardPatterns;
 import com.intellij.patterns.XmlPatterns;
 import com.intellij.psi.*;
 import com.intellij.psi.xml.XmlAttribute;
+import com.intellij.psi.xml.XmlElement;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.PlatformIcons;
 import com.intellij.util.ProcessingContext;
+import com.intellij.util.xml.GenericAttributeValue;
 import org.jetbrains.annotations.NotNull;
 import org.springirun.model.Alias;
 import org.springirun.model.Bean;
@@ -70,8 +72,8 @@ public class SpringirunCompletionContributor extends CompletionContributor {
                 .resolveSetters(psiClass, namePrefix, namespacePrefix)) {
               result.addElement(
                   LookupElementBuilder.create(method).withIcon(PlatformIcons.METHOD_ICON));
-              result.addElement(LookupElementBuilder.create(method + _REF)
-                  .withIcon(BEAN_METHOD_ICON));
+              result.addElement(
+                  LookupElementBuilder.create(method + _REF).withIcon(BEAN_METHOD_ICON));
             }
           }
         }
@@ -112,20 +114,22 @@ public class SpringirunCompletionContributor extends CompletionContributor {
 
           //TODO: find a better way to resolve XmlTag and XmlAttribute
           Optional<XmlTag> parent =
-              Optional.ofNullable(element).map(PsiElement::getParent).map(PsiElement::getParent).map(PsiElement::getParent)
-                  .filter(XmlTag.class::isInstance).map(XmlTag.class::cast);
+              Optional.ofNullable(element).map(PsiElement::getParent).map(PsiElement::getParent)
+                  .map(PsiElement::getParent).filter(XmlTag.class::isInstance)
+                  .map(XmlTag.class::cast);
           if (!parent.isPresent()) {
             return;
           }
-          Optional<XmlAttribute> attribute = Optional.ofNullable(element)
-              .map(PsiElement::getParent).map(PsiElement::getParent).filter(XmlAttribute.class::isInstance).map(XmlAttribute.class::cast);
+          Optional<XmlAttribute> attribute =
+              Optional.ofNullable(element).map(PsiElement::getParent).map(PsiElement::getParent)
+                  .filter(XmlAttribute.class::isInstance).map(XmlAttribute.class::cast);
           final String prefix = result.getPrefixMatcher().getPrefix();
 
           PsiClass psiClass = SpringirunCompletionUtils.resolveBean(parent.get(), attribute);
 
           if (psiClass != null) {
-            Arrays.stream(psiClass.getAllMethods())
-                .filter(method.and(accessible).and(valueReturn).and(noArgs).and(withNamePrefix(prefix)))
+            Arrays.stream(psiClass.getAllMethods()).filter(
+                method.and(accessible).and(valueReturn).and(noArgs).and(withNamePrefix(prefix)))
                 .map(PsiMethod::getName)
                 .map(m -> LookupElementBuilder.create(m).withIcon(PlatformIcons.METHOD_ICON))
                 .forEach(result::addElement);
@@ -142,11 +146,13 @@ public class SpringirunCompletionContributor extends CompletionContributor {
           final PsiElement element = parameters.getPosition();
 
           //TODO: find a better way to resolve XmlTag and XmlAttribute
-          Optional<XmlAttribute> attribute = Optional.ofNullable(element)
-              .map(PsiElement::getParent).map(PsiElement::getParent).filter(XmlAttribute.class::isInstance).map(XmlAttribute.class::cast);
+          Optional<XmlAttribute> attribute =
+              Optional.ofNullable(element).map(PsiElement::getParent).map(PsiElement::getParent)
+                  .filter(XmlAttribute.class::isInstance).map(XmlAttribute.class::cast);
 
           Optional<XmlTag> parent =
-              attribute.map(PsiElement::getParent).filter(XmlTag.class::isInstance).map(XmlTag.class::cast);
+              attribute.map(PsiElement::getParent).filter(XmlTag.class::isInstance)
+                  .map(XmlTag.class::cast);
           if (!parent.isPresent()) {
             return;
           }
@@ -155,8 +161,8 @@ public class SpringirunCompletionContributor extends CompletionContributor {
           PsiClass psiClass = SpringirunCompletionUtils.resolveBean(parent.get(), attribute);
 
           if (psiClass != null) {
-            Arrays.stream(psiClass.getAllMethods())
-                .filter(method.and(accessible).and(noReturn).and(noArgs).and(withNamePrefix(prefix)))
+            Arrays.stream(psiClass.getAllMethods()).filter(
+                method.and(accessible).and(noReturn).and(noArgs).and(withNamePrefix(prefix)))
                 .map(PsiMethod::getName)
                 .map(m -> LookupElementBuilder.create(m).withIcon(PlatformIcons.METHOD_ICON))
                 .forEach(result::addElement);
@@ -170,12 +176,12 @@ public class SpringirunCompletionContributor extends CompletionContributor {
             final ProcessingContext context, @NotNull final CompletionResultSet result) {
           final PsiElement element = parameters.getPosition();
 
-          Optional<XmlAttribute> attribute = Optional.ofNullable(element)
-              .map(PsiElement::getParent).map(PsiElement::getParent).filter(XmlAttribute.class::isInstance).map(XmlAttribute.class::cast);
+          Optional<XmlAttribute> attribute =
+              Optional.ofNullable(element).map(PsiElement::getParent).map(PsiElement::getParent)
+                  .filter(XmlAttribute.class::isInstance).map(XmlAttribute.class::cast);
 
-          Optional<XmlTag> parent =
-              attribute.map(PsiElement::getParent).map(PsiElement::getParent)
-                  .filter(XmlTag.class::isInstance).map(XmlTag.class::cast);
+          Optional<XmlTag> parent = attribute.map(PsiElement::getParent).map(PsiElement::getParent)
+              .filter(XmlTag.class::isInstance).map(XmlTag.class::cast);
           if (!parent.isPresent()) {
             return;
           }
@@ -185,12 +191,9 @@ public class SpringirunCompletionContributor extends CompletionContributor {
           PsiClass psiClass = SpringirunCompletionUtils.resolveBean(parent.get(), attribute);
 
           if (psiClass != null) {
-            Arrays.stream(psiClass.getAllMethods())
-                .filter(constructor.and(accessible).and(anyArgs))
-                .map(PsiMethod::getParameterList)
-                .map(PsiParameterList::getParameters)
-                .flatMap(Arrays::stream)
-                .map(PsiParameter::getName)
+            Arrays.stream(psiClass.getAllMethods()).filter(constructor.and(accessible).and(anyArgs))
+                .map(PsiMethod::getParameterList).map(PsiParameterList::getParameters)
+                .flatMap(Arrays::stream).map(PsiParameter::getName)
                 .filter(n -> n.startsWith(prefix))
                 .map(m -> LookupElementBuilder.create(m).withIcon(PlatformIcons.FIELD_ICON))
                 .forEach(result::addElement);
@@ -207,25 +210,25 @@ public class SpringirunCompletionContributor extends CompletionContributor {
           final PsiElement element = parameters.getPosition();
           final String prefix = result.getPrefixMatcher().getPrefix();
 
-          XmlAttribute xmlAttribute = (XmlAttribute) element.getParent().getParent();
+          Optional<XmlAttribute> xmlAttribute = Optional.ofNullable(element)
+              .map(PsiElement::getParent).map(PsiElement::getParent).filter(XmlAttribute.class::isInstance)
+              .map(XmlAttribute.class::cast);
 
-          final Beans beans = SpringirunCompletionUtils.getDocumentRoot(xmlAttribute);
+          final Optional<Beans> beans = SpringirunCompletionUtils.getDocumentRoot(xmlAttribute);
+          if (beans.isPresent()) {
+            for (Bean bean : beans.get().getBeans()) {
+              Optional.ofNullable(bean).map(Bean::getId).map(GenericAttributeValue::getValue)
+                  .filter(v -> v.startsWith(prefix)).map(LookupElementBuilder::create)
+                  .map(e -> e.withIcon(SpringirunCompletionUtils.BEAN_ICON)).ifPresent(result::addElement);
 
-          for (Bean bean : beans.getBeans()) {
-            if (bean.getId().getValue() != null && bean.getId().getValue().startsWith(prefix)) {
-              result.addElement(LookupElementBuilder.create(bean.getId().getValue())
-                  .withIcon(SpringirunCompletionUtils.BEAN_ICON));
+              Optional.ofNullable(bean).map(Bean::getName).map(GenericAttributeValue::getValue)
+                  .filter(v -> v.startsWith(prefix)).map(LookupElementBuilder::create)
+                  .map(e -> e.withIcon(SpringirunCompletionUtils.BEAN_ICON)).ifPresent(result::addElement);
             }
-            if (bean.getName().getValue() != null && bean.getName().getValue().startsWith(prefix)) {
-              result.addElement(LookupElementBuilder.create(bean.getName().getValue())
-                  .withIcon(SpringirunCompletionUtils.BEAN_ICON));
-            }
-          }
-          for (Alias alias : beans.getAliases()) {
-            if (alias.getAlias().getValue() != null && alias.getAlias().getValue()
-                .startsWith(prefix)) {
-              result.addElement(LookupElementBuilder.create(alias.getAlias().getValue())
-                  .withIcon(SpringirunCompletionUtils.BEAN_ALIAS_ICON));
+            for (Alias alias : beans.get().getAliases()) {
+              Optional.ofNullable(alias).map(Alias::getAlias).map(GenericAttributeValue::getValue)
+                  .filter(v -> v.startsWith(prefix)).map(LookupElementBuilder::create)
+                  .map(e -> e.withIcon(SpringirunCompletionUtils.BEAN_ALIAS_ICON)).ifPresent(result::addElement);
             }
           }
         }
@@ -242,8 +245,8 @@ public class SpringirunCompletionContributor extends CompletionContributor {
         propertyNameCompletionProvider);
 
     extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue()
-            .inside(XmlPatterns.xmlAttribute(NAME)
-                .inside(XmlPatterns.xmlTag().withLocalName(CONSTRUCTOR_ARG).withNamespace(BEAN_NAMESPACE)))),
+            .inside(XmlPatterns.xmlAttribute(NAME).inside(
+                XmlPatterns.xmlTag().withLocalName(CONSTRUCTOR_ARG).withNamespace(BEAN_NAMESPACE)))),
         constructorArgumentCompletionProvider);
 
     extend(CompletionType.BASIC, XmlPatterns.psiElement().inside(XmlPatterns.xmlAttributeValue()

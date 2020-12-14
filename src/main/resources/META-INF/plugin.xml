@@ -36,11 +36,11 @@
                     description="Re-import Spring XSD files"
                     class="org.springirun.SpringXSDAction">
             </action>
-            <action id="Springirun.ContextManager" text="Context Manager"
-                    description="Show context manager"
-                    class="org.springirun.tool.ContextManagerEditorAction" icon="/images/bean.png">
+<!--            <action id="Springirun.ContextManager" text="Context Manager"-->
+<!--                    description="Show context manager"-->
+<!--                    class="org.springirun.tool.ContextManagerEditorAction" icon="/images/bean.png">-->
 
-            </action>
+<!--            </action>-->
             <add-to-group group-id="MainMenu" anchor="last"/>
         </group>
     </actions>
